@@ -97,14 +97,19 @@ float getLinePosition2(uint16_t * sensorVals)
   // 0.5-1.0 -> center - far right
   // 2.0 -> intersection
 
-  float linePos = 0;
+  float linePos = 0.0;
 
   // if all sensors are seeing black, return 0 to indicate bot is at an intersection
+  bool atIntersection = true;
   for (int i=0; i<LS_NUM_SENSORS; i++)
   {
-    if (sensorVals[i] > BLACK_VAL) {
-      return 2.0;
+    if (sensorVals[i] < BLACK_VAL) {
+      atIntersection = false;
     }
+  }
+  if (atIntersection)
+  {
+    return 2.0;
   }
 
   int maxIndex = 0;
@@ -160,14 +165,13 @@ void loop()
     delay(5000);
   }
 
-  rightSpeed = (uint16_t)((float)(fastSpeed-normalSpeed)*linePos) + normalSpeed;
-  leftSpeed = fastSpeed - rightSpeed + normalSpeed;
+  leftSpeed = (uint16_t)((float)(fastSpeed-normalSpeed)*linePos) + normalSpeed;
+  rightSpeed = fastSpeed - leftSpeed + normalSpeed;
 
   setMotorSpeed(LEFT_MOTOR,leftSpeed);
   setMotorSpeed(RIGHT_MOTOR,rightSpeed);
   Serial.println(leftSpeed);
   Serial.println(rightSpeed);
-  delay(250);
 
 
   /*Uncomment the Serial Print code block below to observe the analog values for each of 
