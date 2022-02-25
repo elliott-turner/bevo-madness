@@ -95,6 +95,8 @@ void setup() {
 	pinMode(BP_SW_PIN_4,INPUT_PULLUP);
 	pinMode(BP_SW_PIN_5,INPUT_PULLUP);
 
+  enableMotor(BOTH_MOTORS);
+
   /* NOTE: this also isn't being used, just to give an idea of what you can do*/
   curr_state = KEEP_DRIVING; // Initalize the current state to the default, keep driving.
 }
@@ -129,7 +131,7 @@ void avoid_right() {
   curr_state = KEEP_DRIVING;
 }
 
-void stop() {
+void stuck() {
   setMotorSpeed(BOTH_MOTORS,0);
 }
 
@@ -170,15 +172,19 @@ void loop() {
             states and transitions into other states in separate state functions. Check out the code here: 
             https://github.com/bminch/PIE/blob/main/FSM1.ino
             and a video explanation of the code here: https://www.youtube.com/watch?v=TRgUtG_C3FI */
-      enableMotor(BOTH_MOTORS);
-      setMotorDirection(BOTH_MOTORS,MOTOR_DIR_FORWARD);
-      setMotorSpeed(BOTH_MOTORS,motorSpeed); // NOTE: RIGHT_MOTOR and LEFT_MOTOR are also defined in SimpleRSLK.h
-      if(curr_state = KEEP_DRIVING) {
+
+      if (curr_state == KEEP_DRIVING) {
+        setMotorDirection(BOTH_MOTORS,MOTOR_DIR_FORWARD);
+        setMotorSpeed(BOTH_MOTORS,motorSpeed); // NOTE: RIGHT_MOTOR and LEFT_MOTOR are also defined in SimpleRSLK.h
         Serial.print("DRIVING!"); 
-        
       }
 
-      if(MR==0 || ML==0) {
+      if(MR==0 && ML==0 && R==0 && FR==0 && L==0 && FL==0) {
+        Serial.print("STUCK!");
+        //IN STUCK STATE
+        curr_state = STOP;
+      }
+      else if(MR==0 || ML==0) {
         Serial.print("HEAD ON COLLISION!");
         //IN HEAD ON STATE
         curr_state = AVOID_HEADON;
@@ -215,7 +221,7 @@ void loop() {
           avoid_left();
           break;
         case STOP:
-          stop();
+          stuck();
           break;
       }  
 	} // END WHILE TRUE
