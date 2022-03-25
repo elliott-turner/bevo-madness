@@ -41,16 +41,16 @@ typedef struct {
   int val;
 } INST;
 
-INST instructions[] = {
-  {0, 0},
-  {1, 0},
-  {0, 0},
-  {1, 90},
-  {0, 0},
-  {1, -90},
-  {2, 0}
+INST instructions[] = { // list of instructions to end facing right basket
+  {0, 0},   // drive to next intersection
+  {1, 0},   // turn 0 deg (go straight at intersection)
+  {0, 0},   // drive to next intersection
+  {1, 90},  // turn 90 deg (take right at intersection)
+  {0, 0},   // drive to next intersection
+  {1, -90}, // turn -90 deg (take left at intersection)
+  {2, 0}    // stop
 };
-int numInstructions = 7;
+int numInstructions = 7; // instruction count
 
 //INST instructions[] = {
 //  {0, 0},
@@ -134,6 +134,7 @@ void simpleCalibrate() {
 
 float getLinePosition3(uint16_t * sensorVals)
 {
+  // return line position (-1 to +1 with 0 being center)
   bool offLine = true;
   for (int i=0; i<8; i++) {
     if ((float)sensorVals[i] - WHITE_VAL > 0) {
@@ -145,6 +146,7 @@ float getLinePosition3(uint16_t * sensorVals)
   if (offLine) { return linePos; }
   
   float linePosition = 0;
+  // use weighted sum to determine "weighted" line position
   linePosition += (((float)sensorVals[0]-WHITE_VAL)/SENSOR_RANGE) * -1.0;
   linePosition += (((float)sensorVals[1]-WHITE_VAL)/SENSOR_RANGE) * -0.7;
   linePosition += (((float)sensorVals[2]-WHITE_VAL)/SENSOR_RANGE) * -0.3;
@@ -205,7 +207,7 @@ void loop()
   uint16_t speedDelta;
   linePos = getLinePosition3(sensorVal);
 
-
+  // set motor speeds to counteract any offset of line position from center
   speedDelta = (uint16_t)(((float)fastSpeed-(float)normalSpeed)/2.0*linePos + ((float)fastSpeed-(float)normalSpeed)/2.0);
   leftSpeed = normalSpeed + speedDelta;
   rightSpeed = fastSpeed - speedDelta;
