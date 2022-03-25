@@ -30,13 +30,55 @@
  */
 
 #include "SimpleRSLK.h"
+#include <stdio.h>
 
-#define BLACK_VAL 2000
+#define BLACK_VAL 2000.0
+#define WHITE_VAL 750.0
+#define SENSOR_RANGE 2500.0
+
+typedef struct {
+  uint8_t type; // 0 -> drive to next intersection, 1 -> turn val degrees (right positive), 2 -> stop
+  int val;
+} INST;
+
+INST instructions[] = {
+  {0, 0},
+  {1, 0},
+  {0, 0},
+  {1, 90},
+  {0, 0},
+  {1, -90},
+  {2, 0}
+};
+int numInstructions = 7;
+
+//INST instructions[] = {
+//  {0, 0},
+//  {1, 90},
+//  {0, 0},
+//  {1, 90},
+//  {0, 0},
+//  {1, 180},
+//  {0, 0},
+//  {1, -90},
+//  {0, 0},
+//  {1, -90},
+//  {0, 0},
+//  {1, 180},
+//};
+//int numInstructions = 12;
+
+
+int instructionIndex = 0;
+
+uint16_t normalSpeed = 15;
+uint16_t fastSpeed = 30;
 
 uint16_t sensorVal[LS_NUM_SENSORS];
 uint16_t sensorCalVal[LS_NUM_SENSORS];
 uint16_t sensorMaxVal[LS_NUM_SENSORS];
-uint16_t sensorMinVal[LS_NUM_SENSORS];    
+uint16_t sensorMinVal[LS_NUM_SENSORS];
+float linePos;  
 
 void setup()
 {
@@ -48,7 +90,8 @@ void setup()
 	/* Red led in rgb led */
 	setupLed(RED_LED);
 	clearMinMax(sensorMinVal,sensorMaxVal);
- 
+
+  linePos = 0;
 }
 
 void floorCalibration() {
@@ -61,9 +104,7 @@ void floorCalibration() {
 
 	delay(1000);
 
-	Serial.println("Running calibration on floor");
 	simpleCalibrate();
-	Serial.println("Reading floor values complete");
 
 	btnMsg = "Push left button on Launchpad to begin line following.\n";
 	btnMsg += "Make sure the robot is on the line.\n";
@@ -91,50 +132,58 @@ void simpleCalibrate() {
 	disableMotor(BOTH_MOTORS);
 }
 
-float getLinePosition2(uint16_t * sensorVals)
+float getLinePosition3(uint16_t * sensorVals)
 {
-  // 0.0-0.5 -> far left - center
-  // 0.5-1.0 -> center - far right
-  // 2.0 -> intersection
-
-  float linePos = 0.0;
-
-  // if all sensors are seeing black, return 0 to indicate bot is at an intersection
-  bool atIntersection = true;
-  for (int i=0; i<LS_NUM_SENSORS; i++)
-  {
-    if (sensorVals[i] < BLACK_VAL) {
-      atIntersection = false;
+  bool offLine = true;
+  for (int i=0; i<8; i++) {
+    if ((float)sensorVals[i] - WHITE_VAL > 0) {
+      offLine = false;
+      break;
     }
   }
-  if (atIntersection)
-  {
-    return 2.0;
+
+  if (offLine) { return linePos; }
+  
+  float linePosition = 0;
+  linePosition += (((float)sensorVals[0]-WHITE_VAL)/SENSOR_RANGE) * -1.0;
+  linePosition += (((float)sensorVals[1]-WHITE_VAL)/SENSOR_RANGE) * -0.7;
+  linePosition += (((float)sensorVals[2]-WHITE_VAL)/SENSOR_RANGE) * -0.3;
+  linePosition += (((float)sensorVals[3]-WHITE_VAL)/SENSOR_RANGE) * -0.1;
+  linePosition += (((float)sensorVals[4]-WHITE_VAL)/SENSOR_RANGE) * 0.1;
+  linePosition += (((float)sensorVals[5]-WHITE_VAL)/SENSOR_RANGE) * 0.3;
+  linePosition += (((float)sensorVals[6]-WHITE_VAL)/SENSOR_RANGE) * 0.7;
+  linePosition += (((float)sensorVals[7]-WHITE_VAL)/SENSOR_RANGE) * 1.0;
+
+  if (linePosition*linePosition > 1) {
+    if (linePosition > 0) { linePosition = 1; }
+    else { linePosition = -1; }
   }
 
-  int maxIndex = 0;
-  uint16_t maxVal = 0;
-  for (int i=0; i<LS_NUM_SENSORS; i++)
-  {
-    if (sensorVals[i] > maxVal)
-    {
-      maxVal = sensorVals[i];
-      maxIndex = i;
-    }
+  return linePosition;
+  
+}
+
+void turn(int deg)
+{
+  setMotorSpeed(BOTH_MOTORS,normalSpeed);
+  delay(150);
+  if (deg > 0) {
+    setMotorDirection(RIGHT_MOTOR,MOTOR_DIR_BACKWARD);
+    delay(deg*10);
+    setMotorDirection(RIGHT_MOTOR,MOTOR_DIR_FORWARD);
   }
-  return (float)(maxIndex)/7.0;
+  if (deg < 0) {
+    setMotorDirection(LEFT_MOTOR,MOTOR_DIR_BACKWARD);
+    delay(deg*10*-1);
+    setMotorDirection(LEFT_MOTOR,MOTOR_DIR_FORWARD);
+  }
+  delay(300);
 }
 
 bool isCalibrationComplete = false;
 void loop()
 {
-	uint16_t normalSpeed = 17;
-	uint16_t fastSpeed = 24;
 
-	/* Valid values are either:
-	 *  DARK_LINE  if your floor is lighter than your line
-	 *  LIGHT_LINE if your floor is darker than your line
-	 */
 	uint8_t lineColor = DARK_LINE;
 
 	/* Run this setup only once */
@@ -150,68 +199,19 @@ void loop()
 					  sensorMinVal,
 					  sensorMaxVal,
 					  lineColor);
-
-//	uint32_t linePos = getLinePosition(sensorCalVal,lineColor);
-
   
   uint16_t rightSpeed;
   uint16_t leftSpeed;
-  float linePos = getLinePosition2(sensorVal);
+  uint16_t speedDelta;
+  linePos = getLinePosition3(sensorVal);
 
-  Serial.println(linePos);
 
-  if (linePos == 2.0) {
-    Serial.println("reached intersection");
-    delay(5000);
-  }
-
-  leftSpeed = (uint16_t)((float)(fastSpeed-normalSpeed)*linePos) + normalSpeed;
-  rightSpeed = fastSpeed - leftSpeed + normalSpeed;
+  speedDelta = (uint16_t)(((float)fastSpeed-(float)normalSpeed)/2.0*linePos + ((float)fastSpeed-(float)normalSpeed)/2.0);
+  leftSpeed = normalSpeed + speedDelta;
+  rightSpeed = fastSpeed - speedDelta;
 
   setMotorSpeed(LEFT_MOTOR,leftSpeed);
   setMotorSpeed(RIGHT_MOTOR,rightSpeed);
-  Serial.println(leftSpeed);
-  Serial.println(rightSpeed);
-
-
-  /*Uncomment the Serial Print code block below to observe the analog values for each of 
-   * the 8 individual embedded IR sensors on the robot. You cann index into the sensor array
-   * this way.
-   */
-  
-    /*
-    Serial.println(sensorVal[0]); //the left-most sensor if facing same direction as robot
-    Serial.println(sensorVal[1]);
-    Serial.println(sensorVal[2]);
-    Serial.println(sensorVal[3]);
-    Serial.println(sensorVal[4]); 
-    Serial.println(sensorVal[5]);
-    Serial.println(sensorVal[6]);
-    Serial.println(sensorVal[7]); //the right-most sensor if facing same direction as robot
-    Serial.println("---------------"); 
-    */
-
-  /*
-   * Uncomment the Serial line below to read linePos which is an estimate of the lateral position of the black line.
-   */
-   
-   //Serial.println(linePos);
-
-
-  /*
-   * Uncomment the Line follow code block below for a simple line following mechanism.
-   */
-
-	/*if(linePos > 0 && linePos < 3000) {
-		setMotorSpeed(LEFT_MOTOR,normalSpeed);
-		setMotorSpeed(RIGHT_MOTOR,fastSpeed);
-	} else if(linePos > 3500) {
-		setMotorSpeed(LEFT_MOTOR,fastSpeed);
-		setMotorSpeed(RIGHT_MOTOR,normalSpeed);
-	} else {
-		setMotorSpeed(LEFT_MOTOR,normalSpeed);
-		setMotorSpeed(RIGHT_MOTOR,normalSpeed);
-	}*/
 
 
   /* For lab 3 you will need to develop a state machine which can accomplish the following task. 
@@ -230,7 +230,32 @@ void loop()
 
 
    //Develop your state machine here
-   
 
+  bool atIntersection = true;
+  for (int i=0; i<8; i++)
+  {
+    if (sensorVal[i] < 2000) {
+      atIntersection = false;
+      break;
+    }
+  }
+
+  Serial.print(instructionIndex);
+
+  if (instructions[instructionIndex].type == 0 && instructionIndex != numInstructions) {
+    if (atIntersection) { instructionIndex++; }
+  }
+  if (instructions[instructionIndex].type == 1 && instructionIndex != numInstructions) {
+    turn(instructions[instructionIndex].val);
+    instructionIndex++;
+  }
+  if (instructions[instructionIndex].type == 2 && instructionIndex != numInstructions) {
+    disableMotor(BOTH_MOTORS);
+    setup();
+  }
+  if (instructionIndex >= numInstructions)
+  {
+    instructionIndex = 0;
+  }
     
 }
