@@ -1,6 +1,4 @@
 #include <stdio.h>
-#include <msp432.h>
-#include <SimpleRSLK.h>
 
 #define NOP __asm__ __volatile__ ("nop\n\t")
 
