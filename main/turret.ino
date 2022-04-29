@@ -29,15 +29,15 @@ void turret_set_angle(float angle) {
     int i;
     for (i=0; i<num_steps; i++) {
         switch (steps) {
-            case 0: SET_COILS(1, 1, 0, 0); break;
-            case 1: SET_COILS(0, 1, 0, 0); break;
-            case 2: SET_COILS(0, 1, 1, 0); break;
-            case 3: SET_COILS(0, 0, 1, 0); break;
-            case 4: SET_COILS(0, 0, 1, 1); break;
-            case 5: SET_COILS(0, 0, 0, 1); break;
-            case 6: SET_COILS(1, 0, 0, 1); break;
-            case 7: SET_COILS(1, 0, 0, 0); break;
-            default: SET_COILS(0, 0, 0, 0); break;
+            case 0: set_coils(1, 1, 0, 0); break;
+            case 1: set_coils(0, 1, 0, 0); break;
+            case 2: set_coils(0, 1, 1, 0); break;
+            case 3: set_coils(0, 0, 1, 0); break;
+            case 4: set_coils(0, 0, 1, 1); break;
+            case 5: set_coils(0, 0, 0, 1); break;
+            case 6: set_coils(1, 0, 0, 1); break;
+            case 7: set_coils(1, 0, 0, 0); break;
+            default: set_coils(0, 0, 0, 0); break;
         }
         if (direction) { steps++; }
         else { steps--; }
