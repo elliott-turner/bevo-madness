@@ -33,7 +33,7 @@ void move_turn(float deg) {
         setMotorDirection(RIGHT_MOTOR, MOTOR_DIR_FORWARD);
         setMotorDirection(LEFT_MOTOR, MOTOR_DIR_BACKWARD);
     }
-    delay(abs(deg)*10.0);
+    delay(abs(deg)*11.0);
     move_stop();
 }
 
