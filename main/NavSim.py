@@ -45,7 +45,7 @@ a = min(measurements2)
 #c = min(measurements2[0], measurements2[179])
 wall = (measurements2[measurements2.index(a)-90], measurements2[measurements2.index(a)+90])
 #theta = 180 - measurements2.index(a)
-print(ans, (wall[0], a, theta))
+print(ans, (wall[0], a, theta)
 
 # fig = plt.figure()
 # ax1 = plt.subplot(121)
