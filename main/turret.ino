@@ -52,8 +52,10 @@ void turret_set_angle(float angle) {
         delayMicroseconds(delay);
     }
     current_angle = angle;
+    disable();
 }
 
 void turret_move_angle(float angle) {
     turret_set_angle(current_angle + angle);
+    disable();
 }
