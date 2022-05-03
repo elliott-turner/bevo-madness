@@ -3,10 +3,10 @@ bool direction = true;
 int steps = 0;
 
 void turret_start() {
-    pinMode(IN1, OUTPUT);
-    pinMode(IN2, OUTPUT);
-    pinMode(IN3, OUTPUT);
-    pinMode(IN4, OUTPUT);
+    pinMode(N1, OUTPUT);
+    pinMode(N2, OUTPUT);
+    pinMode(N3, OUTPUT);
+    pinMode(N4, OUTPUT);
 }
 
 float turret_get_angle() {
@@ -15,10 +15,14 @@ float turret_get_angle() {
 
 void set_coils(int in1, int in2, int in3, int in4) {
     
-    digitalWrite(IN1, in1);
-    digitalWrite(IN2, in2);
-    digitalWrite(IN3, in3);
-    digitalWrite(IN4, in4);
+    digitalWrite(N1, in1);
+    digitalWrite(N2, in2);
+    digitalWrite(N3, in3);
+    digitalWrite(N4, in4);
+}
+
+void disable() {
+    set_coils(0, 0, 0, 0);
 }
 
 void turret_set_angle(float angle) {

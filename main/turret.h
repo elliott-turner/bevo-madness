@@ -1,7 +1,7 @@
-#define IN1 66
-#define IN2 50
-#define IN3 62
-#define IN4 49
+#define N1 66
+#define N2 50
+#define N3 62
+#define N4 49
 
 #define STEPS_PER_DEG 11.5
 #define NG 100
