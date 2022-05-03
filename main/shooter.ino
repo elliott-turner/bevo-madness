@@ -9,7 +9,6 @@ void shooter_start() {
     pinMode(IN3, OUTPUT);
     pinMode(IN4, OUTPUT);
 
-    pinMode(EN1A, INPUT_PULLUP);
     pinMode(EN1B, INPUT_PULLUP);
     pinMode(EN2A, INPUT_PULLUP);
     pinMode(EN2B, INPUT_PULLUP);
@@ -21,8 +20,6 @@ void shooter_start() {
     digitalWrite(IN3, LOW);
     digitalWrite(IN4, HIGH);
 
-    attachInterrupt(EN1A, en1a_isr, RISING);
-    attachInterrupt(EN1A, en1a_isr, FALLING);
     attachInterrupt(EN1B, en1b_isr, RISING);
     attachInterrupt(EN1B, en1b_isr, FALLING);
     attachInterrupt(EN2A, en2a_isr, RISING);
@@ -57,26 +54,8 @@ void shoot(int power) {
     Serial.println(abs(en2_position));
 }
 
-void en1a_isr() {
-    if (digitalRead(EN1A) == HIGH) {
-        if (digitalRead(EN1B) == LOW) { en1_position --; }
-        else { en1_position++; }
-    }
-    else {
-        if (digitalRead(EN1B) == LOW) { en1_position ++; }
-        else { en1_position--; }
-    }
-}
-
 void en1b_isr() {
-    if (digitalRead(EN1B) == HIGH) {
-        if (digitalRead(EN1A) == LOW) { en1_position ++; }
-        else { en1_position--; }
-    }
-    else {
-        if (digitalRead(EN1A) == LOW) { en1_position --; }
-        else { en1_position++; }
-    }
+    en1_position++;
 }
 
 void en2a_isr() {
