@@ -24,7 +24,7 @@ void move_straight(float dist) {
         setMotorDirection(BOTH_MOTORS, MOTOR_DIR_BACKWARD);
     }
 
-    int num_steps = (int)(dist*40.0);
+    int num_steps = (int)(abs(dist)*40.0);
     bool left_done = false;
     bool right_done = false;
     while (true) {
@@ -55,7 +55,7 @@ void move_turn(float deg) {
         setMotorDirection(LEFT_MOTOR, MOTOR_DIR_BACKWARD);
     }
     
-    int num_steps = (int)(deg*2.05);
+    int num_steps = (int)(abs(deg)*2.05);
     bool left_done = false;
     bool right_done = false;
     while (true) {
@@ -73,6 +73,19 @@ void move_turn(float deg) {
 
 void move_stop(void) {
     setMotorSpeed(BOTH_MOTORS, 0);
+}
+
+bool check_for_line(void) {
+    bool at_line = false;
+    int j;
+    readLineSensor(sensor_vals);
+    for (j=0; j<LS_NUM_SENSORS; j++) {
+        if (sensor_vals[j] >= BLACK_VAL) {
+            at_line = true;
+            break;
+        }
+    }
+    return at_line;
 }
 
 void move_to_line(void) {

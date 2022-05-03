@@ -8,4 +8,5 @@
 void move_straight(float dist);
 void move_turn(float deg);
 void move_stop(void);
+bool check_for_line(void);
 void move_to_line(void);
