@@ -31,12 +31,12 @@ void shooter_start() {
 void shoot(int power) {
     analogWrite(ENA, 255);
     int i=0;
-    for (i=0; i<1000; i++) {
+    for (i=0; i<100; i++) {
         en1_position = 0;
-        delay(10);
-        Serial.println(abs(en1_position));
-        if (abs(en1_position) > power) { break; }
+        delay(50);
+        if (en1_position >= power) { break; }
     }
+    analogWrite(ENA, 200);
     delay(100);
     en2_position = 0;
     analogWrite(ENB, 255);
@@ -49,6 +49,7 @@ void shoot(int power) {
     while (abs(en2_position) < 30) { delay(1); }
     
     analogWrite(ENB, 0);
+    delay(500);
     analogWrite(ENA, 0);
     Serial.print("DONE: ");
     Serial.println(abs(en2_position));
