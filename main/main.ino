@@ -28,10 +28,12 @@ void loop()
     float dist = 0.0;
 
     int i = 0;
+    int num_short_dist = 0;
     for (i=0; i<36; i++) {
         dist = measure_distance();
         Serial.println(dist);
-        if (dist <= 20) { break; }
+        if (dist <= 16) { num_short_dist++; }
+        if (num_short_dist > 3) { break; }
         move_turn(10);
     }
     Serial.println("AIMING");
