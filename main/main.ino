@@ -5,6 +5,7 @@
 #include "ir.h"
 #include "motion.h"
 #include "turret.h"
+#include "shooter.h"
 
 void setup()
 {
@@ -16,6 +17,7 @@ void setup()
     ir_start();
     motion_start();
     turret_start();
+    shooter_start();
 }
 
 void loop()
@@ -83,5 +85,35 @@ void loop()
     // TODO: what to do if line still not found
     move_straight(18);
 
-    while (true) {}
+    char last_basket = ' ';
+    disableMotor(BOTH_MOTORS);
+    while (true) {
+        bool ir_l = detect_beacon('L');
+        bool ir_m = detect_beacon('M');
+        bool ir_r = detect_beacon('R');
+
+        if (ir_l) {
+            if (last_basket != 'L') {
+                turret_set_angle(-28);
+                shoot(780);
+                last_basket = 'L';
+            }
+        }
+        else if (ir_r) {
+            if (last_basket != 'R') {
+            turret_set_angle(28);
+            shoot(780);
+            last_basket = 'R';
+            }
+        }
+        else if (ir_m) {
+            if (last_basket != 'M') {
+            turret_set_angle(0);
+            shoot(730);
+            last_basket = 'M';
+            }
+        }
+
+        delay(1500);
+    }
 }
