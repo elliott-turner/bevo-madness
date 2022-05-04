@@ -117,19 +117,31 @@ void pid_step(float set_l, float set_r) {
     curr_time = (double)millis();
     elap_time = curr_time - last_time;
 
-    double error, response;
+    double error, response, steps;
 
-    double steps_l = (double)getEncoderLeftCnt() - pid_data_l.last_encoder;
-    error = steps_l - set_l;
+    steps = (double)getEncoderLeftCnt() - pid_data_l.last_encoder;
+    pid_data_l.last_encoder += steps;
+    error = steps - set_l * elap_time * 0.0175;
+    error = -1*error;
     pid_data_l.d_error = (error - pid_data_l.p_error) / elap_time;
     pid_data_l.p_error = error;
     pid_data_l.i_error += pid_data_l.p_error * elap_time;
-
     response =  pid_data_l.p_error * MOTOR_GAIN_P +
                 pid_data_l.i_error * MOTOR_GAIN_I +
                 pid_data_l.d_error * MOTOR_GAIN_D;
+    setMotorSpeed(LEFT_MOTOR, response / elap_time / 0.0175);
 
-    setMotorSpeed(LEFT_MOTOR, response); // TODO: scale response to motor speed range
+    steps = (double)getEncoderRightCnt() - pid_data_r.last_encoder;
+    pid_data_r.last_encoder += steps;
+    error = steps - set_l * elap_time * 0.0175;
+    error = -1*error;
+    pid_data_r.d_error = (error - pid_data_r.p_error) / elap_time;
+    pid_data_r.p_error = error;
+    pid_data_r.i_error += pid_data_r.p_error * elap_time;
+    response =  pid_data_r.p_error * MOTOR_GAIN_P +
+                pid_data_r.i_error * MOTOR_GAIN_I +
+                pid_data_r.d_error * MOTOR_GAIN_D;
+    setMotorSpeed(RIGHT_MOTOR, response / elap_time / 0.0175);
     
     // TODO: repeat above calculations for right motor
 
