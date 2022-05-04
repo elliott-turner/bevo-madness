@@ -112,14 +112,36 @@ bool check_for_line(void) {
     return at_line;
 }
 
-void move_to_line(void) {
+void move_to_line(float dist) {
+    resetLeftEncoderCnt();
+	resetRightEncoderCnt();
+
     setMotorSpeed(BOTH_MOTORS, SPEED_NORMAL);
     setMotorDirection(BOTH_MOTORS, MOTOR_DIR_FORWARD);
 
     bool at_line = false;
-    int i, j;
-    i = 0;
-    while (i < 1000) {
+    int j;
+
+    int num_steps = (int)(abs(dist)*40.0);
+    bool left_done = false;
+    bool right_done = false;
+    pid_start();
+    while (true) {
+        if (getEncoderLeftCnt() > num_steps) {
+            left_done = true;
+            setMotorSpeed(LEFT_MOTOR, 0);
+        }
+        if (getEncoderRightCnt() > num_steps) {
+            right_done = true;
+            setMotorSpeed(RIGHT_MOTOR, 0);
+        }
+        if (millis() - last_time >= 100) {
+            if (left_done && !right_done) { pid_step(0, SPEED_NORMAL); }
+            else if (!left_done && right_done) { pid_step(SPEED_NORMAL, 0); }
+            else { pid_step(SPEED_NORMAL, SPEED_NORMAL); }
+        }
+        if (left_done && right_done) { break; }
+
         readLineSensor(sensor_vals);
         for (j=0; j<LS_NUM_SENSORS; j++) {
             if (sensor_vals[j] >= BLACK_VAL) {
@@ -127,7 +149,11 @@ void move_to_line(void) {
                 break;
             }
         }
-        if (at_line) { break; }
+
+        if (at_line) {
+            if (getEncoderLeftCnt() < getEncoderRightCnt()) { num_steps = getEncoderLeftCnt(); }
+            else { getEncoderLeftCnt(); }
+        }
     }
     move_stop();
 }
