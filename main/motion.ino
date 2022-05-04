@@ -5,6 +5,18 @@ float line_position = 0;
 
 uint16_t sensor_vals[LS_NUM_SENSORS];
 
+double last_time, curr_time, elap_time;
+
+struct PID_Data {
+    double p_error;
+    double i_error;
+    double d_error;
+    unsigned long last_encoder;
+};
+
+struct PID_Data pid_data_l = {0x0};
+struct PID_Data pid_data_r = {0x0};
+
 void motion_start() {
     line_position = 0;
     enableMotor(BOTH_MOTORS);
@@ -93,4 +105,33 @@ void move_to_line(void) {
         if (at_line) { break; }
     }
     move_stop();
+}
+
+void pid_start() {
+    last_time = millis();
+    memset(&pid_data_l, 0x0, sizeof(pid_data_l));
+    memset(&pid_data_r, 0x0, sizeof(pid_data_r));
+}
+
+void pid_step(float set_l, float set_r) {
+    curr_time = (double)millis();
+    elap_time = curr_time - last_time;
+
+    double error, response;
+
+    double steps_l = (double)getEncoderLeftCnt() - pid_data_l.last_encoder;
+    error = steps_l - set_l;
+    pid_data_l.d_error = (error - pid_data_l.p_error) / elap_time;
+    pid_data_l.p_error = error;
+    pid_data_l.i_error += pid_data_l.p_error * elap_time;
+
+    response =  pid_data_l.p_error * MOTOR_GAIN_P +
+                pid_data_l.i_error * MOTOR_GAIN_I +
+                pid_data_l.d_error * MOTOR_GAIN_D;
+
+    setMotorSpeed(LEFT_MOTOR, response); // TODO: scale response to motor speed range
+    
+    // TODO: repeat above calculations for right motor
+
+    last_time = curr_time;
 }
