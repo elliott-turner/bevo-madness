@@ -1,4 +1,4 @@
-#define SPEED_NORMAL 10
+#define SPEED_NORMAL 15
 #define SPEED_SLOW 20
 
 #define SENSOR_RANGE 2500.0
