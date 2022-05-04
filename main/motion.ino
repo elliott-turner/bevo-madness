@@ -49,8 +49,10 @@ void move_straight(float dist) {
             right_done = true;
             setMotorSpeed(RIGHT_MOTOR, 0);
         }
-        if (!left_done && !right_done && millis() - last_time >= 100) {
-            pid_step(SPEED_NORMAL, SPEED_NORMAL);
+        if (millis() - last_time >= 100) {
+            if (left_done && !right_done) { pid_step(0, SPEED_NORMAL); }
+            else if (!left_done && right_done) { pid_step(SPEED_NORMAL, 0); }
+            else { pid_step(SPEED_NORMAL, SPEED_NORMAL); }
         }
         if (left_done && right_done) { break; }
     }
@@ -84,8 +86,10 @@ void move_turn(float deg) {
             right_done = true;
             setMotorSpeed(RIGHT_MOTOR, 0);
         }
-        if (!left_done && !right_done && millis() - last_time >= 100) {
-            pid_step(SPEED_NORMAL, SPEED_NORMAL);
+        if (millis() - last_time >= 100) {
+            if (left_done && !right_done) { pid_step(0, SPEED_NORMAL); }
+            else if (!left_done && right_done) { pid_step(SPEED_NORMAL, 0); }
+            else { pid_step(SPEED_NORMAL, SPEED_NORMAL); }
         }
         if (left_done && right_done) { break; }
     }
