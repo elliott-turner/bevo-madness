@@ -39,6 +39,7 @@ void move_straight(float dist) {
     int num_steps = (int)(dist*40.0);
     bool left_done = false;
     bool right_done = false;
+    pid_start();
     while (true) {
         if (getEncoderLeftCnt() > num_steps) {
             left_done = true;
@@ -47,6 +48,9 @@ void move_straight(float dist) {
         if (getEncoderRightCnt() > num_steps) {
             right_done = true;
             setMotorSpeed(RIGHT_MOTOR, 0);
+        }
+        if (!left_done && !right_done && millis() - last_time >= 100) {
+            pid_step(SPEED_NORMAL, SPEED_NORMAL);
         }
         if (left_done && right_done) { break; }
     }
@@ -70,6 +74,7 @@ void move_turn(float deg) {
     int num_steps = (int)(deg*2.05);
     bool left_done = false;
     bool right_done = false;
+    pid_start();
     while (true) {
         if (getEncoderLeftCnt() > num_steps) {
             left_done = true;
@@ -78,6 +83,9 @@ void move_turn(float deg) {
         if (getEncoderRightCnt() > num_steps) {
             right_done = true;
             setMotorSpeed(RIGHT_MOTOR, 0);
+        }
+        if (!left_done && !right_done && millis() - last_time >= 100) {
+            pid_step(SPEED_NORMAL, SPEED_NORMAL);
         }
         if (left_done && right_done) { break; }
     }
