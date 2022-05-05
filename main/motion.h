@@ -1,5 +1,5 @@
 #define SPEED_NORMAL 15
-#define SPEED_SLOW 20
+#define SPEED_SLOW 10
 
 #define SENSOR_RANGE 2500.0
 #define WHITE_VAL 750.0

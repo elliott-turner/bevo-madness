@@ -199,25 +199,7 @@ void follow_line_to_intersection(float dist) {
         }
 
         // estimate line position using center of mass equation
-        line_position = (
-                1.00 * sensor_vals[0] + 
-                0.71 * sensor_vals[1] +
-                0.43 * sensor_vals[2] +
-                0.14 * sensor_vals[3] +
-                -0.14 * sensor_vals[4] +
-                -0.43 * sensor_vals[5] +
-                -0.71 * sensor_vals[6] +
-                -1.00 * sensor_vals[7]
-            ) / (
-                sensor_vals[0] +
-                sensor_vals[1] +
-                sensor_vals[2] +
-                sensor_vals[3] +
-                sensor_vals[4] +
-                sensor_vals[5] +
-                sensor_vals[6] +
-                sensor_vals[7]
-            );
+        calculate_line_position();
 
         if (at_line) { previous_line_position = line_position; }
         else { line_position = previous_line_position; }
@@ -266,6 +248,119 @@ void follow_line_to_intersection(float dist) {
     move_stop();
 }
 
+void straighten_on_line(float dist) {
+    float front_dist = 0.0;
+    float back_dist = 0.0;
+    float front_offset = 0.0;
+    float back_offset = 0.0;
+    int i, num_black, offset_index_sum, num_steps;
+    float offset_index;
+    bool found_line, left_done, right_done;
+
+    resetLeftEncoderCnt();
+	resetRightEncoderCnt();
+
+    setMotorSpeed(BOTH_MOTORS, SPEED_SLOW);
+    setMotorDirection(BOTH_MOTORS, MOTOR_DIR_FORWARD);
+
+    num_steps = (int)(abs(dist)*41.58036592);
+    left_done = false;
+    right_done = false;
+    pid_start();
+    while (true) {
+        if (getEncoderLeftCnt() > num_steps) {
+            left_done = true;
+            setMotorSpeed(LEFT_MOTOR, 0);
+        }
+        if (getEncoderRightCnt() > num_steps) {
+            right_done = true;
+            setMotorSpeed(RIGHT_MOTOR, 0);
+        }
+        if (millis() - last_time >= 100) {
+            if (left_done && !right_done) { pid_step(0, SPEED_NORMAL); }
+            else if (!left_done && right_done) { pid_step(SPEED_NORMAL, 0); }
+            else { pid_step(SPEED_NORMAL, SPEED_NORMAL); }
+        }
+        if (left_done && right_done) { break; }
+
+        num_black = 0;
+        readLineSensor(sensor_vals);
+        for (i=0; i<LS_NUM_SENSORS; i++) {
+            if (sensor_vals[i] >= BLACK_VAL) {
+                num_black++;
+            }
+        }
+        if (num_black <= 1) {
+            if (getEncoderLeftCnt() < getEncoderRightCnt()) { num_steps = getEncoderLeftCnt(); }
+            else { getEncoderLeftCnt(); }
+        }
+    }
+
+    front_dist = (float)num_steps / 41.58036592;
+    calculate_line_position();
+    front_offset = line_position * 7;
+
+    move_straight(-dist);
+
+    resetLeftEncoderCnt();
+	resetRightEncoderCnt();
+
+    setMotorSpeed(BOTH_MOTORS, SPEED_SLOW);
+    setMotorDirection(BOTH_MOTORS, MOTOR_DIR_BACKWARD);
+
+    num_steps = (int)(abs(dist)*41.58036592);
+    left_done = false;
+    right_done = false;
+    pid_start();
+    while (true) {
+        if (getEncoderLeftCnt() > num_steps) {
+            left_done = true;
+            setMotorSpeed(LEFT_MOTOR, 0);
+        }
+        if (getEncoderRightCnt() > num_steps) {
+            right_done = true;
+            setMotorSpeed(RIGHT_MOTOR, 0);
+        }
+        if (millis() - last_time >= 100) {
+            if (left_done && !right_done) { pid_step(0, SPEED_NORMAL); }
+            else if (!left_done && right_done) { pid_step(SPEED_NORMAL, 0); }
+            else { pid_step(SPEED_NORMAL, SPEED_NORMAL); }
+        }
+        if (left_done && right_done) { break; }
+
+        num_black = 0;
+        readLineSensor(sensor_vals);
+        for (i=0; i<LS_NUM_SENSORS; i++) {
+            if (sensor_vals[i] >= BLACK_VAL) {
+                num_black++;
+            }
+        }
+        if (num_black <= 1) {
+            if (getEncoderLeftCnt() < getEncoderRightCnt()) { num_steps = getEncoderLeftCnt(); }
+            else { getEncoderLeftCnt(); }
+        }
+    }
+
+    back_dist = (float)num_steps / 41.58036592;
+    calculate_line_position();
+    back_offset = line_position * 7;
+
+    float y = front_dist + back_dist;
+    float x = front_offset - back_offset;
+    float angle = atan(x/y)*180.0/2/3.1415*-1;
+
+    Serial.print(y);
+    Serial.print(" ");
+    Serial.print(x);
+    Serial.print(" ");
+    Serial.print(angle);
+    Serial.println();
+
+    move_straight(dist);
+    delay(150);
+    move_turn(angle);
+}
+
 void pid_start() {
     last_time = millis();
     memset(&pid_data_l, 0x0, sizeof(pid_data_l));
@@ -306,4 +401,26 @@ void pid_step(float set_l, float set_r) {
     // TODO: repeat above calculations for right motor
 
     last_time = curr_time;
+}
+
+void calculate_line_position() {
+    line_position = (
+            1.00 * sensor_vals[0] + 
+            0.71 * sensor_vals[1] +
+            0.43 * sensor_vals[2] +
+            0.14 * sensor_vals[3] +
+            -0.14 * sensor_vals[4] +
+            -0.43 * sensor_vals[5] +
+            -0.71 * sensor_vals[6] +
+            -1.00 * sensor_vals[7]
+        ) / (
+            sensor_vals[0] +
+            sensor_vals[1] +
+            sensor_vals[2] +
+            sensor_vals[3] +
+            sensor_vals[4] +
+            sensor_vals[5] +
+            sensor_vals[6] +
+            sensor_vals[7]
+        );
 }
