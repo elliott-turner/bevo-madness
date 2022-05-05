@@ -37,7 +37,7 @@ void move_straight(float dist) {
         setMotorDirection(BOTH_MOTORS, MOTOR_DIR_BACKWARD);
     }
 
-    int num_steps = (int)(abs(dist)*40.0);
+    int num_steps = (int)(abs(dist)*41.58036592);
     bool left_done = false;
     bool right_done = false;
     pid_start();
@@ -123,7 +123,7 @@ void move_to_line(float dist) {
     bool at_line = false;
     int j;
 
-    int num_steps = (int)(abs(dist)*40.0);
+    int num_steps = (int)(abs(dist)*41.58036592);
     bool left_done = false;
     bool right_done = false;
     pid_start();
@@ -171,7 +171,7 @@ void follow_line_to_intersection(float dist) {
     double previous_line_position = 0;
     int j;
 
-    int num_steps = (int)(abs(dist)*40.0);
+    int num_steps = (int)(abs(dist)*41.58036592);
     bool left_done = false;
     bool right_done = false;
     pid_start();
