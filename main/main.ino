@@ -71,16 +71,20 @@ void loop()
     move_turn(-((45-min_index)*4));
     Serial.println("DONE");
 
-    // move to center line
-    move_turn(90);
     bool on_left_side = true;
-    if (measure_distance() < 36) {
-        move_turn(-180);
-        on_left_side = false;
+    if (check_for_line()) { move_turn(180); }
+    // move to center line
+    else {
+        move_turn(90);
+        if (measure_distance() < 36) {
+            move_turn(-180);
+            on_left_side = false;
+        }
+        move_to_line(16);
+        move_straight(0.5);
+        if (on_left_side) { move_turn(90); }
+        else { move_turn(-90); }
     }
-    move_to_line(16);
-    if (on_left_side) { move_turn(90); }
-    else { move_turn(-90); }
 
     // TODO: what to do if line still not found
     move_straight(18);
