@@ -80,10 +80,17 @@ void loop()
             move_turn(-180);
             on_left_side = false;
         }
-        move_to_line(16);
-        move_straight(0.5);
-        if (on_left_side) { move_turn(90); }
-        else { move_turn(-90); }
+        bool found_line = false;
+        for (i=0; i<64; i++) {
+            move_straight(0.25);
+            if (check_for_line()) {
+                move_straight(0.5);
+                if (on_left_side) { move_turn(90); }
+                else { move_turn(-90); }
+                found_line = true;
+                break;
+            }
+        }
     }
 
     // TODO: what to do if line still not found
