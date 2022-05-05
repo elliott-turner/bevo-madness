@@ -59,6 +59,15 @@ void en1b_isr() {
     en1_position++;
 }
 
+void load() {
+    en2_position = 0;
+    analogWrite(ENB, 255);
+    while (abs(en2_position) < 500 && digitalRead(IR)) { delay(1); }
+    en2_position = 0;
+    while (abs(en2_position) < 30) { delay(1); }
+    analogWrite(ENB, 0);
+}
+
 void en2a_isr() {
     if (digitalRead(EN2A) == HIGH) {
         if (digitalRead(EN2B) == LOW) { en2_position --; }

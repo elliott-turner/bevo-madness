@@ -12,6 +12,8 @@ void setup()
     Serial.begin(115200);
     setupRSLK();
     setupWaitBtn(LP_LEFT_BTN);
+    pinMode(BP_SW_PIN_5, INPUT_PULLUP);
+    pinMode(BP_SW_PIN_4, INPUT_PULLUP);
 
     ultrasonic_start();
     ir_start();
@@ -22,6 +24,15 @@ void setup()
 
 void loop()
 {
+    while (true) {
+        if (!digitalRead(BP_SW_PIN_4)) {
+            load();
+        }
+        if (!digitalRead(BP_SW_PIN_5)) {
+            break;
+        }
+    }
+    
     // NAVIGATION
     // find a point on back wall
 

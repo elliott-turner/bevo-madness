@@ -11,4 +11,6 @@
 
 #define IR 42 // P9.5
 
-void shooter_start(int power);
+void shooter_start();
+void shoot(int power);
+void load();
