@@ -199,6 +199,7 @@ void follow_line_to_intersection(float dist) {
         }
 
         // estimate line position using center of mass equation
+        calculate_line_position();
 
         if (at_line) { previous_line_position = line_position; }
         else { line_position = previous_line_position; }
@@ -296,22 +297,8 @@ void straighten_on_line(float dist) {
     }
 
     front_dist = (float)num_steps / 41.58036592;
-    num_black = 0;
-    found_line = false;
-    for (i=0; i<LS_NUM_SENSORS; i++) {
-        if (sensor_vals[i] >= BLACK_VAL) {
-            found_line = true;
-            offset_index_sum += i;
-            num_black++;
-        }
-    }
-    if (found_line) {
-        offset_index = (float)offset_index_sum / (float)num_black;
-    }
-    else {
-        offset_index = 3.5;
-    }
-    front_offset = (offset_index - 3.5) * 1;
+    calculate_line_position();
+    front_offset = line_position * 7;
 
     move_straight(-dist);
 
@@ -355,26 +342,12 @@ void straighten_on_line(float dist) {
     }
 
     back_dist = (float)num_steps / 41.58036592;
-    num_black = 0;
-    found_line = false;
-    for (i=0; i<LS_NUM_SENSORS; i++) {
-        if (sensor_vals[i] >= BLACK_VAL) {
-            found_line = true;
-            offset_index_sum += i;
-            num_black++;
-        }
-    }
-    if (found_line) {
-        offset_index = (float)offset_index_sum / (float)num_black;
-    }
-    else {
-        offset_index = 3.5;
-    }
-    back_offset = (offset_index - 3.5) * 1;
+    calculate_line_position();
+    back_offset = line_position * 7;
 
     float y = front_dist + back_dist;
     float x = front_offset - back_offset;
-    float angle = atan(x/y)*180.0/2/3.1415;
+    float angle = atan(x/y)*180.0/2/3.1415*-1;
 
     Serial.print(y);
     Serial.print(" ");
@@ -428,4 +401,26 @@ void pid_step(float set_l, float set_r) {
     // TODO: repeat above calculations for right motor
 
     last_time = curr_time;
+}
+
+void calculate_line_position() {
+    line_position = (
+            1.00 * sensor_vals[0] + 
+            0.71 * sensor_vals[1] +
+            0.43 * sensor_vals[2] +
+            0.14 * sensor_vals[3] +
+            -0.14 * sensor_vals[4] +
+            -0.43 * sensor_vals[5] +
+            -0.71 * sensor_vals[6] +
+            -1.00 * sensor_vals[7]
+        ) / (
+            sensor_vals[0] +
+            sensor_vals[1] +
+            sensor_vals[2] +
+            sensor_vals[3] +
+            sensor_vals[4] +
+            sensor_vals[5] +
+            sensor_vals[6] +
+            sensor_vals[7]
+        );
 }
