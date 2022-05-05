@@ -91,6 +91,8 @@ void loop()
     move_straight(1.5);
     follow_line_to_intersection(12-1.5);
 
+    straighten_on_line(4.0);
+
     char last_basket = ' ';
     disableMotor(BOTH_MOTORS);
     while (true) {
