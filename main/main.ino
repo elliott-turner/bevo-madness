@@ -87,7 +87,9 @@ void loop()
     }
 
     // TODO: what to do if line still not found
-    move_straight(18);
+    follow_line_to_intersection(20);
+    move_straight(1.5);
+    follow_line_to_intersection(12-1.5);
 
     char last_basket = ' ';
     disableMotor(BOTH_MOTORS);
