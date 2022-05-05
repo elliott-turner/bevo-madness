@@ -255,7 +255,7 @@ void straighten_on_line(float dist) {
     float back_offset = 0.0;
     int i, num_black, offset_index_sum, num_steps;
     float offset_index;
-    bool found_line, left_done, right_done;
+    bool found_line, left_done, right_done, front_on_line, back_on_line;
 
     resetLeftEncoderCnt();
 	resetRightEncoderCnt();
@@ -299,6 +299,7 @@ void straighten_on_line(float dist) {
     front_dist = (float)num_steps / 41.58036592;
     calculate_line_position();
     front_offset = line_position * 7;
+    front_on_line = check_for_line();
 
     move_straight(-dist);
 
@@ -344,9 +345,18 @@ void straighten_on_line(float dist) {
     back_dist = (float)num_steps / 41.58036592;
     calculate_line_position();
     back_offset = line_position * 7;
+    back_on_line = check_for_line();
 
-    float y = front_dist + back_dist;
-    float x = front_offset - back_offset;
+    float y = 0; float x = 0;
+    if (front_on_line) {
+        y += front_dist;
+        x += front_offset;
+    }
+    if (back_on_line) {
+        y += back_dist;
+        x -= back_offset;
+    }
+
     float angle = atan(x/y)*180.0/2/3.1415*-1;
 
     Serial.print(y);
