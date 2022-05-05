@@ -117,7 +117,7 @@ void move_to_line(float dist) {
     resetLeftEncoderCnt();
 	resetRightEncoderCnt();
 
-    setMotorSpeed(BOTH_MOTORS, SPEED_NORMAL);
+    setMotorSpeed(BOTH_MOTORS, SPEED_SLOW);
     setMotorDirection(BOTH_MOTORS, MOTOR_DIR_FORWARD);
 
     bool at_line = false;
