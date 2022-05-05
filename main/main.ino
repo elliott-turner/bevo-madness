@@ -86,6 +86,7 @@ void loop()
     if (check_for_line()) { move_turn(180); }
     // move to center line
     else {
+        Serial.println("MOVING TO CENTER LINE");
         move_turn(90);
         if (measure_distance() < 36) {
             move_turn(-180);
@@ -105,11 +106,27 @@ void loop()
     }
 
     // TODO: what to do if line still not found
+    Serial.println("FOLLOING TO INTERSECTION");
     follow_line_to_intersection(20);
+    Serial.println("CROSSING INTERSECTION");
     move_straight(1.5);
-    follow_line_to_intersection(12-1.5);
+    Serial.println("FOLLOING FOR 12 IN");
+    follow_line_to_intersection(12);
 
+    Serial.println("STRAIGHTENING");
     straighten_on_line(4.0);
+
+    bool correct_distance = false;
+    float avg_dist = 0.0;
+    for (i=0; i<3; i++) {
+        dist = measure_distance();
+        if (dist < 29 || dist > 31) { avg_dist += dist; }
+        else { correct_distance = true; }
+    } 
+    if (!correct_distance) {
+        avg_dist = avg_dist / 3.0;
+        move_straight(avg_dist - 30);
+    }
 
     char last_basket = ' ';
     disableMotor(BOTH_MOTORS);
@@ -117,6 +134,9 @@ void loop()
         bool ir_l = detect_beacon('L');
         bool ir_m = detect_beacon('M');
         bool ir_r = detect_beacon('R');
+
+        sprintf(output, "%d %d %d", ir_l, ir_m, ir_r);
+        Serial.println(output);
 
         if (ir_l) {
             if (last_basket != 'L') {
