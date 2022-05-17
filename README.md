@@ -1,7 +1,9 @@
 # Description of Operation
 
 ## Overview
-The final robot design for this project is comprised of 5 subsystems and follows a 2 stage strategy when operating.
+The final robot design for this project (seen below) is comprised of 5 subsystems and follows a 2 stage strategy when operating.
+
+![picture](readme/picture.png)
 
 ## Subsystems
 The 5 subsystems handle the various functions of the robot and work together during competition to enable successful performance.
@@ -197,3 +199,6 @@ state shooting {
 ```
 
 ## Schematic
+Below is a (poorly hand-drawn) schematic of the robot. Note that connections between the launchpad and RSLK motors are not shown as all associated wiring is built into the RSLK main board.
+
+![schematic](readme/schematic.png)
