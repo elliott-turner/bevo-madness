@@ -1,7 +1,8 @@
-# Description of Operation
+# Overview
+This repository contains the code and general description for a robot designed to autonomously play "basketball". This work was done for the final project of ME348E/392Q - Advanced Mechatronics at The University of Texas at Austin during the Spring, 2022 semester. The project is adapted from Ed Carryer, instructor of ME210 at Stanford University. This design was able to win the final competition and set a new record for the most number of baskets made in a single game.
 
-## Overview
-The final robot design for this project (seen below) is comprised of 5 subsystems and follows a 2 stage strategy when operating.
+# Description of Operation
+The final robot design for this project can be seen in the picture below. It is constructed primarily from 3D printed parts with lasercut wood also used in the construction of the shooter. The base, turret mechanism, and sensor and electronics mounting was designed by Elliott Turner and the shooter by Yoon Lee. Wiring was also done by Elliott Turner. The robot's operation can be broken down into 5 subsystems and follows a 2 stage strategy when operating.
 
 ![picture](readme/picture.png)
 
